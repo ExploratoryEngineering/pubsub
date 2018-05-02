@@ -1,4 +1,5 @@
 package pubsub
+
 //
 //Copyright 2018 Telenor Digtial AS
 //
