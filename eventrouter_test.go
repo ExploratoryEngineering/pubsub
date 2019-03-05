@@ -127,3 +127,54 @@ func TestResize(t *testing.T) {
 		router.Unsubscribe(subs[i])
 	}
 }
+
+// ratio of miss/hit
+const ratio = 50
+
+func setupBenchmark(count int) (*EventRouter, []<-chan interface{}) {
+	e := NewEventRouter(1)
+	rand.Seed(time.Now().UnixNano())
+	chs := make([]<-chan interface{}, count)
+	for i := 0; i < count; i++ {
+		if rand.Intn(100) < ratio {
+			chs[i] = e.Subscribe(i)
+		}
+	}
+	return &e, chs
+}
+
+func runTest(e *EventRouter, chans []<-chan interface{}, count int) {
+
+	for i := 0; i < count; i++ {
+		idx := rand.Intn(len(chans))
+		e.Publish(idx, i)
+		select {
+		case <-chans[idx]:
+		default:
+		}
+	}
+}
+
+func BenchmarkEventRouter100(b *testing.B) {
+	e, chs := setupBenchmark(100)
+	b.ResetTimer()
+	runTest(e, chs, b.N)
+}
+
+func BenchmarkEventRouter1000(b *testing.B) {
+	e, chs := setupBenchmark(1000)
+	b.ResetTimer()
+	runTest(e, chs, b.N)
+}
+
+func BenchmarkEventRouter10000(b *testing.B) {
+	e, chs := setupBenchmark(10000)
+	b.ResetTimer()
+	runTest(e, chs, b.N)
+}
+
+func BenchmarkEventRouter100000(b *testing.B) {
+	e, chs := setupBenchmark(100000)
+	b.ResetTimer()
+	runTest(e, chs, b.N)
+}
