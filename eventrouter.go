@@ -17,9 +17,8 @@ package pubsub
 //
 
 import (
+	"log"
 	"sync"
-
-	"github.com/ExploratoryEngineering/logging"
 )
 
 type route struct {
@@ -84,7 +83,7 @@ func (e *EventRouter) Publish(id interface{}, event interface{}) {
 			case route.ch <- event:
 				// This is OK
 			default:
-				logging.Warning("Channel client isn't keeping up with reads. Skipping the event (%v) for ID %v", event, id)
+				log.Printf("Channel client isn't keeping up with reads. Skipping the event (%v) for ID %v", event, id)
 				// Skip event
 			}
 		}
